@@ -8,3 +8,6 @@ class ImagesClient:
         img = images[0]
 
         return img
+
+    def get_random_image(self):
+        pass
