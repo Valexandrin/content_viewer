@@ -1,7 +1,6 @@
 import os
 
 from pydantic import BaseModel
-from frontend.data.db import db
 
 
 class Server(BaseModel):
