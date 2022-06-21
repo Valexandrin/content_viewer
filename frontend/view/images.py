@@ -11,6 +11,5 @@ def show_image():
     image = image_repo.get_image()
     return render_template(
         'image.html',
-        image=image.url,
-        shows=image.amount_of_shows,
+        image_path=image.url,
     )
