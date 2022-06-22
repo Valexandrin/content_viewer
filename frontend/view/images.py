@@ -26,4 +26,5 @@ def show_image():
     return render_template(
         'image.html',
         image_path=image.url,
+        categories=image.categories,
     )

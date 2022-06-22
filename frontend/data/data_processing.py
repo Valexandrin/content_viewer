@@ -1,4 +1,5 @@
 import csv
+from pathlib import Path
 
 
 class Image:
@@ -15,11 +16,14 @@ def create_list(path: str):
     with open(path, 'r') as csvfile:
         reader = csv.reader(csvfile, delimiter=';')
         for row in reader:
-            image_url, amount_of_shows, *categories = row
-            amount_of_shows = int(amount_of_shows)
-            categories = set(categories)
-            img_list.append(Image(image_url, amount_of_shows, categories))
-            total_shows += amount_of_shows
-            avaliable_categories |= categories
+            try:
+                image_url, amount_of_shows, *categories = row
+                amount_of_shows = int(amount_of_shows)
+                categories = set(categories)
+                img_list.append(Image(image_url, amount_of_shows, categories))
+                total_shows += amount_of_shows
+                avaliable_categories |= categories
+            except:
+                continue
 
     return img_list, total_shows, avaliable_categories
