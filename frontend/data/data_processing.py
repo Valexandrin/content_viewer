@@ -1,5 +1,4 @@
 import csv
-import os
 
 
 class Image:
@@ -12,6 +11,7 @@ class Image:
 def create_list(path: str):
     img_list = []
     total_shows = 0
+    avaliable_categories = set()
     with open(path, 'r') as csvfile:
         reader = csv.reader(csvfile, delimiter=';')
         for row in reader:
@@ -20,9 +20,6 @@ def create_list(path: str):
             categories = set(categories)
             img_list.append(Image(image_url, amount_of_shows, categories))
             total_shows += amount_of_shows
+            avaliable_categories |= categories
 
-    return img_list, total_shows
-
-
-images_list, total_shows = create_list(os.environ['CSV_PATH'])
-
+    return img_list, total_shows, avaliable_categories
