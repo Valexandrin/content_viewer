@@ -1,5 +1,10 @@
 import csv
 from pathlib import Path
+import logging
+
+
+logger = logging.getLogger(__name__)
+logging.basicConfig(level=logging.INFO)
 
 
 class Image:
@@ -7,11 +12,16 @@ class Image:
         self.url = url
         self.amount_of_shows = shows
         self.categories = categories
+        self.name = Path(self.url).name
+
+    def __str__(self) -> str:
+        return 'Image, {name}'.format(
+            name=self.name,
+        )
 
 
-def create_list(path: str):
+def create_list(path: str) -> tuple[list, set]:
     img_list = []
-    total_shows = 0
     avaliable_categories = set()
     with open(path, 'r') as csvfile:
         reader = csv.reader(csvfile, delimiter=';')
@@ -21,9 +31,11 @@ def create_list(path: str):
                 amount_of_shows = int(amount_of_shows)
                 categories = set(categories)
                 img_list.append(Image(image_url, amount_of_shows, categories))
-                total_shows += amount_of_shows
                 avaliable_categories |= categories
             except:
                 continue
 
-    return img_list, total_shows, avaliable_categories
+    img_list.sort(key=lambda item: item.amount_of_shows, reverse=True)
+
+    logger.info(' {} images loaded'.format(len(img_list)))
+    return img_list, avaliable_categories

@@ -1,9 +1,8 @@
 from flask import Blueprint, render_template, request
 
-from frontend.client.images import ImagesClient
+from frontend.client.images import image_client
 
 
-image_repo = ImagesClient()
 view = Blueprint('images', __name__)
 
 
@@ -12,19 +11,18 @@ def show_image():
     categories = request.args.getlist('category[]', type=str)
 
     if categories and categories != ['']:
-        image = image_repo.get_image(set(categories))
-        if not image:
-            return render_template(
-                'image.html',
-                message='There are not images which match to requested categories: {}'.format(
-                    ', '.join(categories)
-                ),
-            )
+        image = image_client.get_image(set(categories))
     else:
-        image = image_repo.get_random_image()
+        image = image_client.get_random_image()
+
+    if not image:
+        return render_template(
+            'image.html',
+            message='Not found images matching categories: {}'.format(', '.join(categories)),
+        )
 
     return render_template(
         'image.html',
         image_path=image.url,
-        categories=image.categories,
+        image_name=image.name,
     )

@@ -1,68 +1,89 @@
 from frontend.config import config
-from random import choice
+from frontend.data.data_processing import create_list
 
 
 class ImagesClient:
-    def __init__(self) -> None:
-        self.images_shown = 0
-        self.avaliable_shows = config.data.shows
-        self.images = set(config.data.images)
-        self.avaliable_categories = config.data.categories
+    def __init__(self, images: list, categories: set) -> None:
+        self.images = images
+        self.avaliable_categories = categories
         self.last_shown = None
+
+    def __check_extreme(self):
+        if len(self.images) == 0:
+            return None
+        if len(self.images) == 1:
+            return self.images.pop()
 
     def __check_matching_request(self, requested_categories: set) -> dict:
         matched_images = {}
-        for image in self.images:
-            overlap = len(requested_categories & image.categories)
+        for number in range(len(self.images)):
+            image = self.images[number]
+            overlap = requested_categories & image.categories
             if overlap:
-                matched_images[image] = overlap
+                matched_images[image] = number
         return matched_images
 
-    def __category_validation(self, categories: set) -> set:
-        return self.avaliable_categories & categories
+    def __sort_images(self, image, image_number):
+        try:
+            current_img = image
+            next_img = self.images[image_number + 1]
+            if current_img.amount_of_shows < next_img.amount_of_shows:
+                self.images.insert(image_number + 1, self.images.pop(image_number))
+                self.__sort_images(current_img, image_number + 1)
+        except:
+            return
 
-    def __get_resault_image(self, relevant_images: dict.keys):
-        for image in relevant_images:
-            if len(relevant_images) == 1:
-                return image
-            if not self.__match_by_shows(image):
-                print('Here')
-                continue
+    def __get_by_views(self, relevant_images: dict) -> dict:
+        if len(relevant_images.keys()) == 1:
+            return relevant_images
+
+        resault_image = {}
+        for image in relevant_images.keys():
+            if not image is self.last_shown:
+                number_in_list = relevant_images[image]
+                resault_image[image] = number_in_list
+                return resault_image
+
+    def __attr_update(self, image_data: dict):
+        for image, image_number in image_data.items():
+            image.amount_of_shows -= 1
+            if image.amount_of_shows == 0:
+                self.images.pop(image_number)
+            else:
+                self.__sort_images(image, image_number)
+
+            self.last_shown = image
             return image
 
-    def __match_by_shows(self, image):
-        if image is self.last_shown:
-            return False
-        if image.amount_of_shows < self.avaliable_shows:
-            return True
-
     def get_image(self, required_categories: set):
-        validated_categories = self.__category_validation(required_categories)
-        if not validated_categories:
+        self.__check_extreme()
+
+        valid_categories = self.avaliable_categories & required_categories
+        if not valid_categories:
             return None
 
-        relevant_images = self.__check_matching_request(validated_categories)
+        relevant_images = self.__check_matching_request(valid_categories)
         if not relevant_images:
             return None
 
-        relevant_images = dict(
-            sorted(relevant_images.items(), key=lambda item: item[1], reverse=True)
-        )
-        resault_image = self.__get_resault_image(relevant_images.keys())
-        resault_image.amount_of_shows -= 1
-
-        if resault_image.amount_of_shows == 0:
-            self.images.discard(resault_image)
-
-        self.last_shown = resault_image
-        self.images_shown += 1
-
-        return resault_image
-
-    def get_random_image(self):
-        images = list(self.images)
-        image = choice(images)
-        while not self.__match_by_shows(image):
-            image = choice(images)
+        resault_image = self.__get_by_views(relevant_images)
+        image = self.__attr_update(resault_image)
 
         return image
+
+    def get_random_image(self):
+        self.__check_extreme()
+
+        resault_image = {}
+        for number in range(len(self.images)):
+            image = self.images[number]
+
+            if not image is self.last_shown:
+                resault_image[image] = number
+                image = self.__attr_update(resault_image)
+
+                return image
+
+
+images, categories = create_list(config.data.endpoint)
+image_client = ImagesClient(images, categories)
