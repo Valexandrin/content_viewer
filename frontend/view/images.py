@@ -2,7 +2,6 @@ from flask import Blueprint, render_template, request
 
 from frontend.client.images import image_client
 
-
 view = Blueprint('images', __name__)
 
 
@@ -18,7 +17,9 @@ def show_image():
     if not image:
         return render_template(
             'image.html',
-            message='Not found images matching categories: {}'.format(', '.join(categories)),
+            message='Not found images matching categories: {categories}'.format(
+                categories=', '.join(categories),
+            ),
         )
 
     return render_template(
