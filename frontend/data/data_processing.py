@@ -1,7 +1,6 @@
 import csv
-from pathlib import Path
 import logging
-
+from pathlib import Path
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
@@ -22,20 +21,22 @@ class Image:
 
 def create_list(path: str) -> tuple[list, set]:
     img_list = []
-    avaliable_categories = set()
+    avaliable_categories: set[str] = set()
     with open(path, 'r') as csvfile:
-        reader = csv.reader(csvfile, delimiter=';')
-        for row in reader:
+        for row in csv.reader(csvfile, delimiter=';'):
             try:
-                image_url, amount_of_shows, *categories = row
-                amount_of_shows = int(amount_of_shows)
-                categories = set(categories)
-                img_list.append(Image(image_url, amount_of_shows, categories))
-                avaliable_categories |= categories
-            except:
+                image = get_instance(row)
+            except ValueError:
                 continue
+            img_list.append(image)
+            avaliable_categories |= image.categories
 
-    img_list.sort(key=lambda item: item.amount_of_shows, reverse=True)
+    img_list.sort(key=lambda img: img.amount_of_shows, reverse=True)
 
-    logger.info(' {} images loaded'.format(len(img_list)))
+    logger.info(' {amount} images loaded'.format(amount=len(img_list)))
     return img_list, avaliable_categories
+
+
+def get_instance(img_data):
+    image_url, amount_of_shows, *categories = img_data
+    return Image(image_url, int(amount_of_shows), set(categories))

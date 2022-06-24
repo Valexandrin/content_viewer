@@ -14,7 +14,7 @@ class DataList(BaseModel):
 
 class AppConfig(BaseModel):
     server: Server
-    data: DataList
+    images_data: DataList
 
 
 def load_from_env() -> AppConfig:
@@ -23,7 +23,7 @@ def load_from_env() -> AppConfig:
     endpoint = os.environ['CSV_PATH']
     return AppConfig(
         server=Server(port=app_port, host=app_host),
-        data=DataList(endpoint=endpoint),
+        images_data=DataList(endpoint=endpoint),
     )
 
 
