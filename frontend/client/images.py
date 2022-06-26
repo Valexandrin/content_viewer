@@ -32,8 +32,7 @@ class ImagesClient:
             resault_image[self.images[0]] = 0
             return self._get_updated_image(resault_image)
 
-        for number, _ in enumerate(self.images):
-            image = self.images[number]
+        for number, image in enumerate(self.images):
 
             if image is not self.last_shown:
                 resault_image[image] = number
@@ -41,8 +40,7 @@ class ImagesClient:
 
     def _check_matching_request(self, requested_categories: set) -> dict:
         matched_images = {}
-        for number, _ in enumerate(self.images):
-            image = self.images[number]
+        for number, image in enumerate(self.images):
             overlap = requested_categories & image.categories
             if overlap:
                 matched_images[image] = number
@@ -63,9 +61,8 @@ class ImagesClient:
             return relevant_images
 
         resault_image = {}
-        for image in relevant_images.keys():
+        for image, number_in_list in relevant_images.items():
             if image is not self.last_shown:
-                number_in_list = relevant_images[image]
                 resault_image[image] = number_in_list
                 break
         return resault_image
